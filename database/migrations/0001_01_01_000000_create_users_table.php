@@ -14,9 +14,15 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('full_name');
-            $table->string('email')->unique();
             $table->string('username')->unique();
+            $table->string('email')->unique();
             $table->string('password');
+            $table->string('profile_picture')->nullable();
+            $table->string('phone_number', 12)->nullable();
+            $table->enum(
+                'status',
+                ['active', 'suspended']
+            );
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
@@ -46,5 +52,6 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('bisnis_owners');
     }
 };
