@@ -35,12 +35,12 @@ class User extends Authenticatable
 
     public function wishlists() : BelongsToMany
     {
-        return $this->belongsToMany(
-          Destination::class, 
-          'wishlists',
-          'user_id',
-          'destination_id',
-          )->withTimestamps();
+      return $this->belongsToMany(
+        Destination::class, 
+        'wishlists',
+        'user_id',
+        'destination_id',
+        )->withTimestamps();
     } 
 
 
