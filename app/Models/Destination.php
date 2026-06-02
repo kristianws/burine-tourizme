@@ -3,33 +3,62 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 
 class Destination extends Model
 {
-    protected $table = 'destinations';
-
     protected $fillable = [
-        'user_id',
+        'mitra_id',
+        'category_id',
         'name',
         'description',
         'location',
-        'google_maps_url',
-        'image_url',
-        'status'
+        'business_license_number',
+        'open_time',
+        'close_time',
+        'thumbnail',
+        'status',
+        'approved_at'
     ];
-
-    public function users() : BelongsToMany
+    public function mitra()
     {
-      return $this->belongsToMany(
-        User::class,
-        'wishlists',
-        'destination_id',
-        'user_id'
-      )->withTimestamps();
+        return $this->belongsTo(User::class, 'mitra_id');
     }
 
-    
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
+    public function images()
+    {
+        return $this->hasMany(DestinationImage::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function itineraryItems()
+    {
+        return $this->hasMany(
+            ItineraryItem::class
+        );
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'approved_at' => 'datetime',
+
+            'open_time' => 'datetime:H:i',
+
+            'close_time' => 'datetime:H:i',
+        ];
+    }
 }

@@ -4,21 +4,20 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Destination;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['full_name','username','email','password', 'profile_picture', 'phone_number', 'status'])]
+
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
-
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -26,11 +25,51 @@ class User extends Authenticatable
      * @return array<string, string>
      */
     protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_verified' => 'boolean',
+    ];
+}
+
+    protected $fillable = [
+        'username',
+        'fullname',
+        'email',
+        'password',
+        'role',
+        'avatar',
+        'nik',
+        'ktp_image',
+        'is_verified',
+    ];
+
+    
+
+    public function destinations()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Destination::class, 'mitra_id');
+    }
+
+    public function itineraries()
+    {
+        return $this->hasMany(Itinerary::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 
     public function wishlists() : BelongsToMany
