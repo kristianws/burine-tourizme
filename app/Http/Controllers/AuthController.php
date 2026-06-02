@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Exception;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'username' => 'required|unique:users',
             'fullname' => 'required',
             'email' => 'required|email|unique:users',
@@ -19,15 +22,37 @@ class AuthController extends Controller
             'role' => 'required|in:tourist,mitra,admin'
         ]);
 
-        $validated['password'] =
-            Hash::make($validated['password']);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-        $user = User::create($validated);
+        $validated = $validator->validated();
 
-        return response()->json([
+        try {
+          $validated['password'] = Hash::make($validated['password']);
+
+          $user = User::create($validated);
+
+          if(!$user) {
+              throw new \Exception('Gagal membuat user');
+          }
+
+          return response()->json([
+            'status' => 'success',
             'message' => 'Register berhasil',
             'user' => $user
-        ], 201);
+          ], 201);  
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan saat Registrasi',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
     }
 
     public function login(Request $request)

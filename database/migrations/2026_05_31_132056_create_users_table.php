@@ -6,50 +6,38 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
+  /**
+   * Run the migrations.
+   */
+  public function up(): void
+  {
+    Schema::create('users', function (Blueprint $table) {
+      $table->id();
+      $table->string('username')->unique();
+      $table->string('fullname');
+      $table->string('email')->unique();
+      $table->timestamp('email_verified_at')->nullable();
+      $table->string('password');
+      $table->enum('role', [
+        'tourist',
+        'mitra',
+        'admin'
+      ])->default('tourist');
+      $table->string('avatar')->nullable();
+      $table->string('nik')->nullable();
+      $table->string('ktp_image')->nullable();
+      $table->boolean('is_verified')
+        ->default(false);
+      $table->rememberToken();
+      $table->timestamps();
+    });
+  }
 
-            $table->string('username')->unique();
-
-            $table->string('fullname');
-
-            $table->string('email')->unique();
-
-            $table->timestamp('email_verified_at')->nullable();
-
-            $table->string('password');
-
-            $table->enum('role', [
-                'tourist',
-                'mitra',
-                'admin'
-            ])->default('tourist');
-
-            $table->string('avatar')->nullable();
-
-            $table->string('nik')->nullable();
-
-            $table->string('ktp_image')->nullable();
-
-            $table->boolean('is_verified')
-                ->default(false);
-
-            $table->rememberToken();
-
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('users');
-    }
+  /**
+   * Reverse the migrations.
+   */
+  public function down(): void
+  {
+    Schema::dropIfExists('users');
+  }
 };

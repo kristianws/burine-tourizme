@@ -7,7 +7,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\ReviewController;
 
-
+// public routes
 Route::post('/login', [
     AuthController::class,
     'login'
@@ -18,6 +18,7 @@ Route::post('/register', [
     'register'
 ]);
 
+// protected routes
 Route::middleware('auth:sanctum')
     ->post('/logout', [
         AuthController::class,
