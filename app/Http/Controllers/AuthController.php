@@ -41,13 +41,13 @@ class AuthController extends Controller
           }
 
           return response()->json([
-            'status' => 'success',
+            'success' => true,
             'message' => 'Register berhasil',
             'user' => $user
           ], 201);  
         } catch (Exception $e) {
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Terjadi kesalahan saat Registrasi',
                 'error' => $e->getMessage()
             ], 500);
@@ -57,29 +57,56 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+      $validator = Validator::make($request->all(), [
+        'identity'=> 'required|string',
+        'password' => 'required|string',
+      ]);
+
+      if ($validator->fails()) {
+        return response()->json([
+          'success' => false,
+          'message' => 'Validasi gagal',
+          'errors' => $validator->errors()->first()
+        ], 422);
+      }
+
+      try {
+        $identity = $request->input('identity');
+        $password = $request->input('password');
+
+        $fieldType = filter_var($identity, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+          $fieldType => $identity,
+          'password' => $password
+        ];
 
         if (!Auth::attempt($credentials)) {
-            return response()->json([
-                'message' => 'Email atau password salah'
-            ], 401);
+          return response()->json([
+            'success' => false,
+            'message' => 'Email/Username atau password salah'
+          ], 401);
         }
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
-
-        $user->tokens()->delete();
-
-        $token = $user->createToken('auth-token')
-                    ->plainTextToken;
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Login berhasil',
-            'token' => $token,
-            'user' => $user
+          'success' => true,
+          'message' => 'Login berhasil',
+          'access_token' => $token,
+          'bearer_token' => 'Bearer ',
+          'user' => $user
         ]);
+
+      } catch (Exception $e) {
+        return response()->json([
+          'success' => false,
+          'message' => 'Terjadi kesalahan saat login',
+          'error' => $e->getMessage()
+        ], 500);
+      }
     }
 
     public function logout(Request $request)
