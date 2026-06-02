@@ -22,7 +22,7 @@ class AuthController extends Controller
     // jika validasi gagal, kembalikan response error
     if ($validator->fails()) {
       return response()->json([
-        'status' => 'error',
+        'success' => false,
         'message' => $validator->errors()->first()
       ], 422);
     };
@@ -35,7 +35,7 @@ class AuthController extends Controller
     if(!$user) {
       return response()->json(
         [
-          'status' => 'error',
+          'success' => false,
           'message' => 'email atau username tidak ditemukan'
         ], 404
       );
@@ -44,7 +44,7 @@ class AuthController extends Controller
     // jika user tidak ditemukan atau password salah, kembalikan response error
     if (!Hash::check($request->password, $user->password)) {
       return response()->json([
-        'status' => 'error',
+        'success' => false,
         'message' => 'email atau password salah'
       ], 401);
     };
@@ -73,7 +73,7 @@ class AuthController extends Controller
 
     if ($validator->fails()) {
       return response()->json([
-        'status' => 'error',
+        'success' => false,
         'message' => $validator->errors()->first()
       ], 422);
     };
@@ -83,6 +83,7 @@ class AuthController extends Controller
       'username' => $request->username,
       'email' => $request->email,
       'password' => Hash::make($request->password),
+      'status' => 'active',
     ]);
 
     return response()->json([
