@@ -23,17 +23,11 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->string('name');
-
             $table->text('description');
-
             $table->string('location');
-
             $table->string('business_license_number');
-
             $table->time('open_time');
-
             $table->time('close_time');
-
             $table->string('thumbnail');
 
             $table->enum('status', [

@@ -24,10 +24,6 @@ return new class extends Migration
         'admin'
       ])->default('tourist');
       $table->string('avatar')->nullable();
-      $table->string('nik')->nullable();
-      $table->string('ktp_image')->nullable();
-      $table->boolean('is_verified')
-        ->default(false);
       $table->rememberToken();
       $table->timestamps();
     });

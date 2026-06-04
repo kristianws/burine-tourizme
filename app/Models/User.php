@@ -40,8 +40,7 @@ class User extends Authenticatable
         'password',
         'role',
         'avatar',
-        'nik',
-        'ktp_image',
+        'email_verified_at',
         'is_verified',
     ];
 
@@ -72,15 +71,15 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
-    public function wishlists() : BelongsToMany
-    {
-      return $this->belongsToMany(
-        Destination::class, 
-        'wishlists',
-        'user_id',
-        'destination_id',
-        )->withTimestamps();
-    } 
+    // public function wishlists() : BelongsToMany
+    // {
+    //   return $this->belongsToMany(
+    //     Destination::class, 
+    //     'wishlists',
+    //     'user_id',
+    //     'destination_id',
+    //     )->withTimestamps();
+    // } 
 
 
 }

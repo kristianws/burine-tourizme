@@ -25,8 +25,7 @@ Route::middleware('auth:sanctum')
         'logout'
     ]);
 
-Route::middleware('auth:sanctum')
-    ->get('/me', [
+Route::middleware('auth:sanctum')->get('/me', [
         AuthController::class,
         'me'
     ]);
@@ -43,6 +42,12 @@ Route::get(
     [DestinationController::class, 'show']
 );
 
+Route::get(
+  'destinations/search',
+  [DestinationController::class, 'search']
+);
+
+// Mitra routes
 Route::middleware([
     'auth:sanctum',
     'role:mitra'
@@ -61,7 +66,7 @@ Route::middleware([
     Route::put(
     '/destinations/{id}',
     [DestinationController::class,
-     'update']
+      'update']
     );
 
     Route::delete(
@@ -72,6 +77,7 @@ Route::middleware([
 
 });
 
+// Admin routes
 Route::middleware([
     'auth:sanctum',
     'role:admin'
