@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete(); // Turis reviewer
-            $table->foreignId('destination_id')->constrained()->cascadeOnDelete();
-            $table->tinyInteger('rating'); // Range 1-5, validasi dilakukan di Controller
-            $table->text('comment');
-            $table->text('reply')->nullable(); // Balasan dari Mitra
-            $table->boolean('is_hidden')->default(false); // Moderasi Admin
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('destination_id')->constrained()->onDelete('cascade');
+            $table->tinyInteger('rating')->unsigned()->comment('Rating from 1 to 5');  
+            $table->text('description')->nullable();
+            $table->text('owner_reply')->nullable();
             $table->timestamps();
         });
     }

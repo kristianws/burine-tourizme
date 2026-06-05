@@ -12,36 +12,37 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['full_name','username','email','password', 'profile_picture', 'phone_number', 'status'])]
-#[Hidden(['password', 'remember_token'])]
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+  /** @use HasFactory<UserFactory> */
+  use HasFactory, Notifiable, HasApiTokens;
 
+  protected $fillable = [
+    'full_name',
+    'user_name',
+    'email',
+    'password',
+    'profile_picture',
+    'role',
+    'is_active',
+    'suspended_at',
+    'suspended_reason',
+    'email_verified_at',
+  ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+  /**
+   * Get the attributes that should be cast.
+   *
+   * @return array<string, string>
+   */
+  protected function casts(): array
+  {
+    return [
+      'email_verified_at' => 'datetime',
+      'password' => 'hashed',
+    ];
+  }
 
-    public function wishlists() : BelongsToMany
-    {
-      return $this->belongsToMany(
-        Destination::class, 
-        'wishlists',
-        'user_id',
-        'destination_id',
-        )->withTimestamps();
-    } 
-
-
+  
 }
