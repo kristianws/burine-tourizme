@@ -7,15 +7,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Itinerary extends Model
 {
-    //
-    use HasFactory;
+  //
+  use HasFactory;
 
-    protected $fillable = [
-      'user_id',
-      'title',
-      'start_date',
-      'estimated_price',
-    ];
+  protected $fillable = [
+    'user_id',
+    'title',
+    'start_date',
+    'estimated_price',
+  ];
 
-    
+  public function user()
+  {
+    return $this->belongsTo(User::class);
+  }
+
+  public function itineraryItems()
+  {
+    return $this->hasMany(ItineraryItem::class);
+  }
 }

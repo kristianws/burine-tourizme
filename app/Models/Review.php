@@ -7,4 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Review extends Model
 {
     //
+  protected $fillable = [
+    'user_id',
+    'destination_id',
+    'rating',
+    'description',
+    'owner_reply',
+  ];
+
+  public function destination() {
+    return $this->belongsTo(Destination::class);
+  }
+
+  public function user() {
+    return $this->belongsTo(User::class);
+  }
+
 }

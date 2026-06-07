@@ -1,13 +1,8 @@
 <?php
 
 namespace App\Models;
-
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -25,10 +20,15 @@ class User extends Authenticatable
     'password',
     'profile_picture',
     'role',
-    'is_active',
+    'status',
     'suspended_at',
     'suspended_reason',
     'email_verified_at',
+  ];
+
+  protected $hidden = [
+    'password',
+    'remember_token',
   ];
 
   /**
@@ -44,5 +44,19 @@ class User extends Authenticatable
     ];
   }
 
-  
+  public function bisnisOwner() {
+    return $this->hasOne(BisnisOwner::class);
+  }
+
+  public function wishlists() {
+    return $this->hasMany(Wishlist::class);
+  }
+
+  public function reviews() {
+    return $this->hasMany(Review::class);
+  }
+
+  public function itineraries() {
+    return $this->hasMany(Itinerary::class);
+  }
 }

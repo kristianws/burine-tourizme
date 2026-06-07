@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\JsonResponse;
+use App\ApiResponse;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
   // fungsi untuk login user
-  public function login(Request $request)
+  public function login(Request $request): JsonResponse
   {
     // validasi input
     $validator = Validator::make($request->all(), [
@@ -29,36 +31,32 @@ class AuthController extends Controller
 
     // ambil user berdasarkan email atau username
     $user = User::where('email', $request->identity)
-                ->orWhere('username', $request->identity)
-                ->first();
+      ->orWhere('username', $request->identity)
+      ->first();
 
-    if(!$user) {
-      return response()->json(
-        [
-          'status' => 'error',
-          'message' => 'email atau username tidak ditemukan'
-        ], 404
-      );
+    if (!$user) {
+      return $this->errorResponse('email atau username tidak ditemukan', 404);
     }
 
     // jika user tidak ditemukan atau password salah, kembalikan response error
     if (!Hash::check($request->password, $user->password)) {
-      return response()->json([
-        'status' => 'error',
-        'message' => 'email atau password salah'
-      ], 401);
+      return $this->errorResponse('email atau password salah', 401);
     };
 
     // buat token akses untuk user yang berhasil login
     $token = $user->createToken('auth_token')->plainTextToken;
 
     // kembalikan response sukses dengan token akses
-    return response()->json([
-      'success' => true,
-      'message' => 'login berhasil',
-      'access_token' => $token,
-      'token_type' => 'Bearer',
-    ], 200);
+    return $this->successResponse(
+      [
+        'user_name' => $user['user_name'],
+        'role' => $user['role'],
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+      ],
+      'login berhasil',
+      200
+    );
   }
 
   // fungsi untuk registrasi user baru
@@ -69,6 +67,7 @@ class AuthController extends Controller
       'username' => 'required|string|unique:users',
       'email' => 'required|string|email|unique:users',
       'password' => 'required|string|min:6|confirmed',
+      'role' => 'required|string|in:tourist,bisnis_owner',
     ]);
 
     if ($validator->fails()) {
@@ -78,18 +77,16 @@ class AuthController extends Controller
       ], 422);
     };
 
-    $user = User::create([
-      'full_name' => $request->full_name,
-      'username' => $request->username,
-      'email' => $request->email,
-      'password' => Hash::make($request->password),
-    ]);
+    $validatedData = $validator->validated();
+    $validatedData['password'] = Hash::make($validatedData['password']);
 
-    return response()->json([
-      'success' => true,
-      'message' => 'register berhasil',
-      'data' => $user
-    ], 201);
+    $user = User::create($validatedData);
+
+    return $this->successResponse([
+      'id' => $user['id'],
+      'user_name' => $user['user_name'],
+      'role' => $user['role'],
+    ], 'register berhasil', 201);
   }
 
   // fungsi untuk logout user
@@ -97,9 +94,11 @@ class AuthController extends Controller
   {
     $request->user()->currentAccessToken()->delete();
 
-    return response()->json([
-      'success' => true,
-      'message' => 'logout berhasil'
-    ], 200);
+    return $this->successResponse(null, 'logout berhasil', 200);
+  }
+
+  public function registerBisnisOwner(Request $request)
+  {
+    
   }
 }
