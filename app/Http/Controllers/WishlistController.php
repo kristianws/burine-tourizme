@@ -9,51 +9,71 @@ use Illuminate\Http\Request;
 
 class WishlistController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-      
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(WishlistRequest $request) : JsonResponse
-    {
-        //
-        $validated = $request->validated();
+  /**
+   * Store a newly created resource in storage.
+   */
+  public function store(WishlistRequest $request): JsonResponse
+  {
+    //
+    $validated = $request->validated();
 
-        $wishlist = Wishlist::firstOrCreate([
-          'user_id' => $validated['user_id'],
-          'destination_id' => $validated['destination_id']
-        ]); 
+    $user = $request->user();
 
-        return $this->successResponse('Destinasi Masuk ke Wishlist');
-    }
+    $wishlist = Wishlist::firstOrCreate([
+      'user_id' => $user->id,
+      'destination_id' => $validated['destination_id']
+    ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Wishlist $wishlist)
-    {
-        //
-    }
+    return $this->successResponse('Destinasi Masuk ke Wishlist');
+  }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Wishlist $wishlist)
-    {
-        //
-    }
+  public function show(Request $request): JsonResponse
+  {
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Wishlist $wishlist)
-    {
-        //
-    }
+    $user = $request->user();
+
+    $wishlist = Wishlist::with('user', 'destination')
+      ->where('user_id', $user->id)
+      ->get();
+
+    return $this->successResponse(
+      [
+        'id' => $wishlist->id,
+        'user' => [
+          'id' => $wishlist->user_id,
+          'username' => $wishlist->user->username,
+          'email' => $wishlist->user->email,
+        ],
+        'destination' => [
+          'id' => $wishlist->destination_id,
+          'name' => $wishlist->destination->name,
+          'location' => $wishlist->destination->location,
+          'price' => $wishlist->destination->price,
+          'thumbnail' => $wishlist->destination->thumbnail,
+          'rating' => $wishlist->destination->reviews()->avg('rating'),
+        ],
+      ]
+    );
+  }
+
+  public function wishlistByUserId(int $user_id): JsonResponse
+  {
+    $wishlists = Wishlist::with('user', 'destination')
+      ->where('user_id', $user_id)
+      ->get();
+
+    return $this->successResponse(
+      data: [
+        'wishlists' => $wishlists
+      ]
+    );
+  }
+
+  public function destroy(Wishlist $wishlist): JsonResponse
+  {
+    $wishlist->delete();
+
+    return $this->successResponse('Destinasi berhasil dihapus dari wishlist');
+  }
 }

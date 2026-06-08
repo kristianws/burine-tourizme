@@ -49,7 +49,7 @@ class AuthController extends Controller
     // kembalikan response sukses dengan token akses
     return $this->successResponse(
       [
-        'user_name' => $user['user_name'],
+        'username' => $user['username'],
         'role' => $user['role'],
         'access_token' => $token,
         'token_type' => 'Bearer',
@@ -63,7 +63,7 @@ class AuthController extends Controller
   public function register(Request $request)
   {
     $validator = Validator::make($request->all(), [
-      'full_name' => 'required|string|max:255',
+      'fullname' => 'required|string|max:255',
       'username' => 'required|string|unique:users',
       'email' => 'required|string|email|unique:users',
       'password' => 'required|string|min:6|confirmed',
@@ -84,10 +84,12 @@ class AuthController extends Controller
 
     return $this->successResponse([
       'id' => $user['id'],
-      'user_name' => $user['user_name'],
+      'username' => $user['username'],
       'role' => $user['role'],
     ], 'register berhasil', 201);
   }
+
+  
 
   // fungsi untuk logout user
   public function logout(Request $request)
@@ -95,10 +97,5 @@ class AuthController extends Controller
     $request->user()->currentAccessToken()->delete();
 
     return $this->successResponse(null, 'logout berhasil', 200);
-  }
-
-  public function registerBisnisOwner(Request $request)
-  {
-    
   }
 }

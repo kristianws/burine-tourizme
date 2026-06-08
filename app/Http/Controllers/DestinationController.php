@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\DestinationSearchResource;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\MessagesRequest;
+use Illuminate\Support\Facades\Storage;
 
 
 class DestinationController extends Controller
@@ -27,8 +28,7 @@ class DestinationController extends Controller
   public function store(Request $request)
   {
     $validated = $request->validate([
-      'bisnis_owner_id' => ['required', 'integer', 'exists:bisnis_owners,id'],
-      'category_id' => ['required', 'integer', 'exists:categories,id'],
+      'category_name' => ['required', 'integer', 'exists:categories,id,name'],
       'name' => ['required', 'string', 'max:255'],
       'gmaps' => ['required', 'string', 'max:255'],
       'location' => ['required', 'string', 'max:255'],
@@ -36,47 +36,105 @@ class DestinationController extends Controller
       'description' => ['required', 'string'],
       'open_time' => ['required', 'date_format:H:i:s'],
       'close_time' => ['required', 'date_format:H:i:s'],
-      'thumbnail' => ['nullable', 'string', 'max:255'],
+      'thumbnail' => ['reqired', 'string', 'max:255', 'mimes:jpg,jpeg,png'],
     ]);
 
-    $destination = Destination::create($validated);
+    $bisnisOwner = $request->user()->bisnisOwner->bisnis_owner_id;
 
-    return response()->json(['data' => $destination], 201);
+    if($request->hasFile('thumbnail')) {
+      $file = $request->file('thumbnail');
+
+      $filename = time() . '_' . $file->getClientOriginalName();
+      $folderPath = 'thumbnail/destinations';
+
+      $path = Storage::disk('s3')->putFileAs($folderPath, $file, $filename, 'public');
+
+      $thumbnailPath = Storage::url($path);
+
+      $validated['thumbnail'] = $thumbnailPath;
+
+      $destination = Destination::create(
+        [
+          'bisnis_owner_id' => $bisnisOwner,
+          ...$validated,
+        ]
+        );
+
+      return $this->successResponse(
+        data: $destination,
+        message: 'Destinasi wisata berhasil dibuat',
+        code: 201
+      );
+    }
+
+    return $this->errorResponse(
+      message: 'gagal mengunggah thumbnail',
+      code: 500
+    );
   }
 
-  /**
-   * Display the specified resource.
-   */
-  public function show(Destination $destination)
-  {
-    return response()->json(['data' => $destination]);
-  }
+  private function checkOwnership(
+        Destination $destination,
+        Request $request
+    )
+    {
+        if (
+            $destination->mitra_id !==
+            $request->user()->id
+        ) {
+            abort(403, 'Forbidden');
+        }
+    }
 
   /**
    * Update the specified resource in storage.
    */
-  public function update(Request $request, Destination $destination)
-  {
-    $validated = $request->validate([
-      'bisnis_owner_id' => ['sometimes', 'integer', 'exists:bisnis_owners,id'],
-      'category_id' => ['sometimes', 'integer', 'exists:categories,id'],
-      'name' => ['sometimes', 'string', 'max:255'],
-      'gmaps' => ['sometimes', 'string', 'max:255'],
-      'location' => ['sometimes', 'string', 'max:255'],
-      'price' => ['sometimes', 'numeric'],
-      'description' => ['sometimes', 'string'],
-      'open_time' => ['sometimes', 'date_format:H:i:s'],
-      'close_time' => ['sometimes', 'date_format:H:i:s'],
-      'thumbnail' => ['nullable', 'string', 'max:255'],
-      'status' => ['sometimes', 'in:pending,approved,rejected,deleted'],
-      'moderation_notes' => ['nullable', 'string'],
-      'deleted_at' => ['nullable', 'date'],
-    ]);
+  public function update(
+        Request $request,
+        int $id
+    )
+    {
+        $destination =
+            Destination::findOrFail($id);
 
-    $destination->update($validated);
+        $this->checkOwnership(
+            $destination,
+            $request
+        );
 
-    return response()->json($destination);
-  }
+        $validated = $request->validate([
+            'category_id' =>
+                'required|exists:categories,id',
+
+            'name' =>
+                'required|string|max:255',
+
+            'description' =>
+                'required|string',
+
+            'location' =>
+                'required|string|max:255',
+
+            'business_license_number' =>
+                'required|string|max:255',
+
+            'open_time' =>
+                'required',
+
+            'close_time' =>
+                'required'
+        ]);
+
+        $destination->update($validated);
+
+        return response()->json([
+            'message' =>
+                'Destination berhasil diupdate',
+            'data' =>
+                $destination->fresh()
+        ]);
+    }
+
 
   /**
    * Mengambil semua data destinasi berdasarkan id tertentu.
@@ -87,6 +145,8 @@ class DestinationController extends Controller
     $destination = Destination::with(['category:id,name', 'bisnisOwner:id,name', ''])
       ->withAvg('reviews', 'rating')
       ->findOrFail($destination->id);
+    
+    
 
     return $this->successResponse($destination);
   }
@@ -151,17 +211,6 @@ class DestinationController extends Controller
     return $this->successResponse('Destinasi Wisata Telah Dihapus');
   }
 
-  public function restore(int $id): JsonResponse
-  {
-    $destination = Destination::findOrFail($id);
-
-    $destination->status = 'approved';
-    $destination->deleted_at = null;
-    $destination->save();
-
-    return $this->successResponse('Destinasi Wisata Telah Dipulihkan');
-  }
-
   public function pending(int $id): JsonResponse
   {
     $destination = Destination::findOrFail($id);
@@ -171,4 +220,5 @@ class DestinationController extends Controller
 
     return $this->successResponse('Destinasi Wisata Telah Dikembalikan ke Status Pending');
   }
+
 }

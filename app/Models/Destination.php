@@ -19,7 +19,7 @@ class Destination extends Model
       'close_time',
       'thumbnail',
       'status',
-      'moderation_notes',
+      'notes',
       'deleted_at'
     ];
 
@@ -45,5 +45,15 @@ class Destination extends Model
 
     public function reviews() {
       return $this->hasMany(Review::class);
+    }
+
+    protected function cast() : array
+    {
+        return [
+            'open_time' => 'datetime:H:i:s',
+            'close_time' => 'datetime:H:i:s',
+            'deleted_at' => 'datetime',
+        ];
+
     }
 }

@@ -27,7 +27,12 @@ class ReviewController extends Controller
   {
     $validated = $request->validated();
 
-    $review = Review::create($validated);
+    $review = Review::create([
+      'user_id' => $request->user()->id,
+      'destination_id' => $validated['destination_id'],
+      'rating' => $validated['rating'],
+      'description' => $validated['description'] ?? null,
+    ]);
     $review = new ReviewResource($review);
 
     return $this->successResponse($review, 'Review berhasil ditambahkan');

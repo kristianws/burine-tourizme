@@ -32,8 +32,8 @@ return new class extends Migration
           'rejected',
           'deleted'
         ]
-      );
-      $table->text('moderation_notes')->nullable();
+      )->default('pending');
+      $table->text('notes')->nullable();
       $table->dateTime('deleted_at', precision: 0)->nullable();
       $table->timestamps();
     });

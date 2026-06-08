@@ -21,7 +21,6 @@ class ReviewRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'user_id' => 'required|exists:users,id',
       'destination_id' => 'required|exists:destinations,id',
       'rating' => 'required|integer|min:1|max:5',
       'description' => 'nullable|string',

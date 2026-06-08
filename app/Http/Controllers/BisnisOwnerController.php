@@ -76,8 +76,8 @@ class BisnisOwnerController extends Controller
     }
 
     return $this->errorResponse(
-      message: 'Wajib Upload Foto KTP',
-      code: 400
+      message: 'Gagal Upload Foto KTP',
+      code: 500
     );
   }
 }

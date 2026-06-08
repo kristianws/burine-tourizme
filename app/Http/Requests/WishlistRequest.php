@@ -18,7 +18,6 @@ class WishlistRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'user_id' => 'required|integer|exists:users,id',
       'destination_id' => 'required|integer|exists:destinations,id',
     ];
   }
