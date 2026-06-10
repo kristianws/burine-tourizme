@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Destination;
 use Illuminate\Http\Request;
 use App\Http\Resources\DestinationSearchResource;
+use App\Http\Resources\DestinationResource;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\MessagesRequest;
 use Illuminate\Support\Facades\Storage;
@@ -17,9 +18,30 @@ class DestinationController extends Controller
    */
   public function index()
   {
-    $destinations = Destination::all();
+    $destinations = Destination::with([
+      'category:id,name',
+      'bisnisOwner:id,name',
+      'imageGaleries:id,destination_id,image_url',
+      'reviews:id,destination_id,rating',
+    ])->paginate(10)->get();
 
-    return response()->json(['data' => $destinations], 200);
+    $destinations = DestinationResource::collection($destinations);
+
+    return $this->successResponse($destinations, 'Data Destinasi Wisata Ditemukan', 200);
+  }
+
+  public function show(Destination $destination): JsonResponse
+  {
+    $destination->load([
+      'category:id,name',
+      'bisnisOwner:id,name',
+      'imageGaleries:id,destination_id,image_url',
+      'reviews:id,destination_id,rating',
+    ]);
+
+    $resource = new DestinationResource($destination);
+
+    return $this->successResponse($resource, 'Data Destinasi Wisata Ditemukan', 200);
   }
 
   /**
@@ -47,7 +69,7 @@ class DestinationController extends Controller
       $filename = time() . '_' . $file->getClientOriginalName();
       $folderPath = 'thumbnail/destinations';
 
-      $path = Storage::disk('s3')->putFileAs($folderPath, $file, $filename, 'public');
+      $path = Storage::disk('supabase_thumbnail')->putFileAs($folderPath, $file, $filename, 'public');
 
       $thumbnailPath = Storage::url($path);
 
@@ -115,9 +137,6 @@ class DestinationController extends Controller
             'location' =>
                 'required|string|max:255',
 
-            'business_license_number' =>
-                'required|string|max:255',
-
             'open_time' =>
                 'required',
 
@@ -164,7 +183,7 @@ class DestinationController extends Controller
             ->orWhere('location', 'ilike', "%{$searchQuery}%");
         });
       })
-      ->paginate(10);
+      ->paginate(6);
 
     $resource = DestinationSearchResource::collection($destinations);
 

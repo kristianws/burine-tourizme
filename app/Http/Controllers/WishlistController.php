@@ -57,19 +57,6 @@ class WishlistController extends Controller
     );
   }
 
-  public function wishlistByUserId(int $user_id): JsonResponse
-  {
-    $wishlists = Wishlist::with('user', 'destination')
-      ->where('user_id', $user_id)
-      ->get();
-
-    return $this->successResponse(
-      data: [
-        'wishlists' => $wishlists
-      ]
-    );
-  }
-
   public function destroy(Wishlist $wishlist): JsonResponse
   {
     $wishlist->delete();

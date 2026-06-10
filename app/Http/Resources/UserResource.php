@@ -20,6 +20,7 @@ class UserResource extends JsonResource
           'username' => $this->username,
           'email' => $this->email,
           'profile_picture' => $this->profile_picture,
+          'profile_picture_url' => $this->profile_picture ? Storage::disk('supabase')->url($this->profile_picture) : null,
           'role' => $this->role,
           'bisnis_owner' => new BisnisOwnerResource($this->whenLoaded('bisnisOwner')),
         ];

@@ -6,6 +6,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BisnisOwnerController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ItineraryController;
+use App\Http\Controllers\ItineraryItemController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -15,64 +17,58 @@ use Illuminate\Support\Facades\Route;
  */
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/destinations', [DestinationController::class, 'index']);
 Route::get('/destinations/search', [DestinationController::class, 'searchReviews']);
-
 
 /**
  * Routes API dengan token
  */
-Route::middleware('auth:sanctum')->group(function() {
+Route::middleware('auth:sanctum')->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
-  Route::post('/auth/register-bisnis-owner', [AuthController::class, 'registerBisnisOwner']);
+  Route::get('/me', [UserController::class, 'me']);
+  Route::patch('/me', [UserController::class, 'update']);
+  Route::patch('/me/profile-picture', [UserController::class, 'updateProfilePicture']);
 });
 
-Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(function() {
+/**
+ * Routes API untuk role tourist, bisnis owner, dan admin
+ */
+Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(function () {
 
   Route::post('register-bisnis-owner/', [BisnisOwnerController::class, 'RegisterBisnisOwner']);
+  Route::post('profile/update/', [UserController::class, 'update']);
 
-  Route::get('destinations/reviews/{destinationId}', [ReviewController::class, 'reviewByDestinationId']);
-  
-  Route::post('reviews/{id}', [ReviewController::class, 'store']);
-  
+  Route::get('reviews/{destinationId}', [ReviewController::class, 'reviewByDestinationId']);
+  Route::post('reviews/new', [ReviewController::class, 'store']);
   Route::patch('reviews/update', [ReviewController::class, 'update']);
-  
-  // id destinassi yang akan dimasukkan ke wishlist
+
   Route::post('wishlists/add/{id}', [WishlistController::class, 'store']);
-
-  // id wishlist yang akan dihapus dari wishlist
   Route::delete('wishlists/remove/{id}', [WishlistController::class, 'destroy']);
-
-  // get wishlist berdasarkan user id yang login sekarang
   Route::get('wishlists/', [WishlistController::class, 'show']);
 
+  Route::get('itineraries/', [ItineraryController::class, 'index']);
+  Route::post('itineraries/new', [ItineraryController::class, 'store']);
+  Route::get('itineraries/{itinerary}', [ItineraryController::class, 'show']);
+  Route::get('itineraries/{itinerary}/items', [ItineraryItemController::class, 'index']);
+  Route::post('itineraries/{itinerary}/items', [ItineraryItemController::class, 'store']);
+  Route::delete('itineraries/{itinerary}/items/{itineraryItem}', [ItineraryItemController::class, 'destroy']);
 });
 
-Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner'])->group(function() {
+Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner'])->group(function () {
 
+  Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
   Route::get('destinations/', [DestinationController::class, 'index']);
-
-  Route::post('destinations/new', [DestinationController::class, 'store']);
-
+  Route::post('destinations/', [DestinationController::class, 'store']);
   Route::patch('destinations/{id}/update/', [DestinationController::class, 'update']);
-
   Route::patch('destinations/{id}/reply-review/', [ReviewController::class, 'replyReview']);
 
-  Route::post('upload', [DestinationController::class, 'upload']);
-
 });
 
-Route::prefix('admin/')->middleware(['auth:sanctum', 'role:admin'])->group(function() {
-    Route::patch('approve-bisnis-owner/{bisnisOwner}', [BisnisOwnerController::class, 'approvedBisnisOwner']);
-
-    Route::patch('reject-bisnis-owner/{bisnisOwner}', [BisnisOwnerController::class, 'rejectBisnisOwner']);
-
-    Route::patch('destinations/{id}/approve', [DestinationController::class, 'approved']);
-
-    Route::patch('destinations/{id}/reject', [DestinationController::class, 'rejected']);
-
-    Route::patch('destinations/{id}/delete', [DestinationController::class, 'deleted']);
-
-    Route::patch('destinations/{id}/pending', [DestinationController::class, 'pending']);
-
-
+Route::prefix('admin/')->middleware(['auth:sanctum', 'role:admin'])->group(function () {
+  Route::patch('bisnisOwners/{bisnisOwner}/approve', [BisnisOwnerController::class, 'approvedBisnisOwner']);
+  Route::patch('bisnisOwners/{bisnisOwner}/reject', [BisnisOwnerController::class, 'rejectBisnisOwner']);
+  Route::patch('destinations/{destination}/approve', [DestinationController::class, 'approved']);
+  Route::patch('destinations/{destination}/reject', [DestinationController::class, 'rejected']);
+  Route::patch('destinations/{destination}/delete', [DestinationController::class, 'deleted']);
+  Route::patch('destinations/{destination}/pending', [DestinationController::class, 'pending']);
 });

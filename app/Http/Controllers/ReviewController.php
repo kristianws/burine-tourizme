@@ -23,6 +23,8 @@ class ReviewController extends Controller
     return $this->successResponse($reviews);
   }
 
+  
+
   public function store(ReviewRequest $request)
   {
     $validated = $request->validated();

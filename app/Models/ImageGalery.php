@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ImageGalery extends Model
 {
-    //
-
     protected $fillable = [
       'destination_id',
       'path'
