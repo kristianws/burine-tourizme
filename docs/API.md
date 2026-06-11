@@ -558,5 +558,3 @@ Berikut hal-hal yang perlu diperhatikan karena berpotensi menyebabkan endpoint t
 13. `WishlistController@show` memperlakukan collection wishlist seperti single model.
 14. `ReviewResource` memakai `$this->user->name`, sementara data user cenderung memakai `fullname`/`username`.
 15. `UserResource` memakai `Storage` tetapi import class `Storage` tidak ada.
-
-Jika Anda mau, dokumentasi ini bisa dilanjutkan ke format OpenAPI (`openapi.yaml`) agar bisa dipakai Swagger UI/Postman generator.

@@ -23,6 +23,13 @@ class Destination extends Model
       'deleted_at'
     ];
 
+    protected $casts = [
+      'price' => 'integer',
+      'open_time' => 'datetime:H:i:s',
+      'close_time' => 'datetime:H:i:s',
+      'deleted_at' => 'datetime',
+    ];
+
     public function bisnisOwner() {
       return $this->belongsTo(BisnisOwner::class);
     }

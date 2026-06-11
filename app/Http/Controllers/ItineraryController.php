@@ -19,6 +19,9 @@ class ItineraryController extends Controller
     return $this->successResponse($user, 'Itinerary berhasil dibuat', 201);
   }
 
+  /**
+   * Display a listing of the resource.
+   */
   public function index(Request $request)
   {
     $itineraries = $request->user()
@@ -36,5 +39,16 @@ class ItineraryController extends Controller
     }
 
     return $this->successResponse($itinerary, 'Detail itinerary berhasil diambil', 200);
+  }
+
+  public function destroy(Request $request, Itinerary $itinerary)
+  {
+    if ($itinerary->user_id !== $request->user()->id) {
+      return $this->errorResponse('Anda tidak memiliki akses ke itinerary ini', 403);
+    }
+
+    $itinerary->delete();
+
+    return $this->successResponse(null, 'Itinerary berhasil dihapus', 200);
   }
 }
