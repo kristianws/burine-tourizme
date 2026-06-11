@@ -17,49 +17,61 @@ class UserController extends Controller
     );
   }
 
-  public function update(Request $request) {
+  public function update(Request $request) 
+  {
     $validated = $request->validate([
-      'name' => ['sometimes', 'string', 'max:255'],
-      'email' => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
-      'password' => ['sometimes', 'string', 'min:8'],
-      'profile_picture' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+        'name' => ['sometimes', 'string', 'max:255'],
+        'email' => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
+        'password' => ['sometimes', 'string', 'min:8'],
+        'profile_picture' => ['sometimes', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
     ]);
 
     $user = $request->user();
 
     try {
-      $file = $request->file('profile_picture');
-      $filename = "user_id_{$user->id}_" . time() . '.' . $file->getClientOriginalExtension();
-      $folder_path = "profile/{$user->id}";
+        // Inisialisasi variabel path dengan data lama sebagai default
+        $file_path = $user->profile_picture; 
 
-      if($user->profile_picture && storage::disk('supabase_profile')->exists($user->profile_picture)) {
-        storage::disk('supabase_profile')->delete($user->profile_picture);
-      }
+        // Cek jika ada file baru yang di-upload
+        if ($request->hasFile('profile_picture') && $request->file('profile_picture')->isValid()) {
+            $file = $request->file('profile_picture');
+            $filename = "user_id_{$user->id}_" . time() . '.' . $file->getClientOriginalExtension();
+            $file_path = "profile/user_{$user->id}/{$filename}";
 
-      $path = $file->storeAs($folder_path, $filename, 'supabase_profile');
-      $user = $user->update([
-        'fullname' => $validated['name'] ?? $user->fullname,
-        'email' => $validated['email'] ?? $user->email,
-        'password' => $validated['password'] ?? $user->password,
-        'profile_picture' => $folder_path . '/' . $filename,
-      ]);
+            // Hapus foto lama di Supabase jika ada (Gunakan 'Storage' huruf besar)
+            if ($user->profile_picture && Storage::disk('supabase_profile')->exists($user->profile_picture)) {
+                Storage::disk('supabase_profile')->delete($user->profile_picture);
+            }
 
-      $image_url = Storage::disk('supabase_profile')->url($path);
+            // Upload foto baru
+            Storage::disk('supabase_profile')->put($file_path, file_get_contents($file), 'public');
+        }
 
-      return $this->successResponse(
-        data: [
-          'user' => new UserResource($user->load('bisnisOwner')),
-          'profile_picture_url' => $image_url
-        ],
-        message: 'Profil berhasil diperbarui',
-        code: 200
-      );
-    }
-    catch (\Exception $e) {
-      return $this->errorResponse(
-        message: 'Gagal memperbarui profil: ' . $e->getMessage(),
-        code: 500
-      );
+        // Eksekusi update (Jangan timpa variabel $user dengan hasil update)
+        $user->update([
+            'fullname' => $validated['name'] ?? $user->fullname,
+            'email' => $validated['email'] ?? $user->email,
+            'password' => isset($validated['password']) ? bcrypt($validated['password']) : $user->password,
+            'profile_picture' => $file_path, 
+        ]);
+
+        // Generate URL full untuk dikirim ke frontend
+        $image_url = Storage::disk('supabase_profile')->url($user->profile_picture);
+
+        return $this->successResponse(
+            data: [
+                'user' => new UserResource($user->load('bisnisOwner')),
+                'profile_picture_url' => $image_url // Sekarang variabel ini sudah aman terdefinisi
+            ],
+            message: 'Profil berhasil diperbarui',
+            code: 200
+        );
+
+    } catch (\Exception $e) {
+        return $this->errorResponse(
+            message: 'Gagal memperbarui profil: ' . $e->getMessage(),
+            code: 500
+        );
     }
   }
 }

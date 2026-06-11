@@ -19,11 +19,11 @@ class DestinationController extends Controller
   public function index()
   {
     $destinations = Destination::with([
-      'category:id,name',
-      'bisnisOwner:id,name',
-      'imageGaleries:id,destination_id,image_url',
-      'reviews:id,destination_id,rating',
-    ])->paginate(10)->get();
+      'category',
+      'bisnisOwner',
+      'imageGaleries',
+      'reviews',
+    ])->paginate(10);
 
     $destinations = DestinationResource::collection($destinations);
 
@@ -35,7 +35,7 @@ class DestinationController extends Controller
     $destination->load([
       'category:id,name',
       'bisnisOwner:id,name',
-      'imageGaleries:id,destination_id,image_url',
+      'imageGaleries:id,destination_id,path',
       'reviews:id,destination_id,rating',
     ]);
 
