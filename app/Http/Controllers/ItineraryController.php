@@ -9,11 +9,12 @@ class ItineraryController extends Controller
 {
   public function store(Request $request)
   {
+    
     $validated = $request->validate([
       'title' => 'required|string|max:255',
       'start_date' => 'required|date',
-    ]);
-
+      ]);
+      
     $user = $request->user()->itineraries()->create($validated);
 
     return $this->successResponse($user, 'Itinerary berhasil dibuat', 201);

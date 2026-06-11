@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/destinations', [DestinationController::class, 'index']);
-Route::get('/destinations/search', [DestinationController::class, 'searchReviews']);
+Route::get('/destinations/search', [DestinationController::class, 'search']);
 
 /**
  * Routes API dengan token
@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
   Route::get('/me', [UserController::class, 'me']);
   Route::patch('/me', [UserController::class, 'update']);
-  Route::patch('/me/profile-picture', [UserController::class, 'updateProfilePicture']);
+  Route::patch('/me/profile-picture', [UserController::class, 'update']);
 });
 
 /**
@@ -37,8 +37,8 @@ Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(f
 
   Route::post('register-bisnis-owner/', [BisnisOwnerController::class, 'RegisterBisnisOwner']);
 
-  Route::get('reviews/{destinationId}', [ReviewController::class, 'reviewByDestinationId']);
   Route::post('reviews', [ReviewController::class, 'store']);
+  Route::get('reviews/destinations/{destination}', [ReviewController::class, 'show']);
   Route::patch('reviews/{id}', [ReviewController::class, 'update']);
 
   Route::post('wishlists/{id}', [WishlistController::class, 'store']);
@@ -46,7 +46,7 @@ Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(f
   Route::get('wishlists/', [WishlistController::class, 'show']);
 
   Route::get('itineraries/', [ItineraryController::class, 'index']); // menampilkan semua  itinerary milik user
-  Route::post('itineraries/new', [ItineraryController::class, 'store']); 
+  Route::post('itineraries/', [ItineraryController::class, 'store']); 
   Route::get('itineraries/{itinerary}', [ItineraryController::class, 'show']);
   Route::delete('itineraries/{itinerary}', [ItineraryController::class, 'destroy']);
 
@@ -56,6 +56,8 @@ Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(f
 });
 
 Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner'])->group(function () {
+
+
 
   Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
   Route::get('destinations/', [DestinationController::class, 'index']);

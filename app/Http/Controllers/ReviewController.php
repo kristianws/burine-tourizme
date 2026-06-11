@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Review;
+use App\Models\Destination;
 use App\Http\Requests\ReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Http\Resources\ReviewResource;
@@ -12,11 +13,9 @@ use Illuminate\Http\JsonResponse;
 
 class ReviewController extends Controller
 {
-  public function reviewByDestinationId(int $destinationId): JsonResponse
+  public function show(Destination $destination): JsonResponse
   {
-    $reviews = Review::with('user:id,name,profile_picture')
-      ->where('destination_id', $destinationId)
-      ->get();
+    $reviews = Review::where('destination_id', $destination->id)->get();
 
     $reviews = ReviewResource::collection($reviews);
 

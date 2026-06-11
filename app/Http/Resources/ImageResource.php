@@ -17,7 +17,7 @@ class ImageResource extends JsonResource
       return [
         'id' => $this->id,
         'destination_id' => $this->destination_id,
-        'image_url' => $this->path,
+        'image_url' => $this->path ? Storage::disk('supabase_images_galery')->url($this->path) : null,
       ];
     }
 }

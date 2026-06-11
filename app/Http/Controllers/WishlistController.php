@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Wishlist;
+use App\Http\Resources\WishlistResource;
 use App\Http\Requests\WishlistRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,24 +38,7 @@ class WishlistController extends Controller
       ->where('user_id', $user->id)
       ->get();
 
-    return $this->successResponse(
-      [
-        'id' => $wishlist->id,
-        'user' => [
-          'id' => $wishlist->user_id,
-          'username' => $wishlist->user->username,
-          'email' => $wishlist->user->email,
-        ],
-        'destination' => [
-          'id' => $wishlist->destination_id,
-          'name' => $wishlist->destination->name,
-          'location' => $wishlist->destination->location,
-          'price' => $wishlist->destination->price,
-          'thumbnail' => $wishlist->destination->thumbnail,
-          'rating' => $wishlist->destination->reviews()->avg('rating'),
-        ],
-      ]
-    );
+    return $this->successResponse(WishlistResource::collection($wishlist), 'Wishlist berhasil diambil', 200);
   }
 
   public function destroy(Wishlist $wishlist): JsonResponse

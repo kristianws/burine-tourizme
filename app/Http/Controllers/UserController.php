@@ -11,7 +11,8 @@ class UserController extends Controller
 {
   public function me(Request $request) {
     return $this->successResponse(
-      data: new UserResource($request->user()->load('bisnisOwner')),
+      data: [new UserResource($request->user()->load('bisnisOwner')),
+            'profile_url :' => $request->user()->profile_picture ? Storage::disk('supabase_profile')->url($request->user()->profile_picture) : null],
       message: 'User ditemukan',
       code: 200
     );

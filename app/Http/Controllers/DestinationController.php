@@ -23,11 +23,12 @@ class DestinationController extends Controller
       'bisnisOwner',
       'imageGaleries',
       'reviews',
-    ])->paginate(10);
+    ])->withAvg('reviews', 'rating')
+    ->paginate(6);
 
     $destinations = DestinationResource::collection($destinations);
 
-    return $this->successResponse($destinations, 'Data Destinasi Wisata Ditemukan', 200);
+    return $this->successResponse([$destinations], 'Data Destinasi Wisata Ditemukan', 200);
   }
 
   public function show(Destination $destination): JsonResponse
@@ -58,7 +59,7 @@ class DestinationController extends Controller
       'description' => ['required', 'string'],
       'open_time' => ['required', 'date_format:H:i:s'],
       'close_time' => ['required', 'date_format:H:i:s'],
-      'thumbnail' => ['reqired', 'string', 'max:255', 'mimes:jpg,jpeg,png'],
+      'thumbnail' => ['required', 'string', 'max:255', 'mimes:jpg,jpeg,png'],
     ]);
 
     $bisnisOwner = $request->user()->bisnisOwner->bisnis_owner_id;
@@ -154,21 +155,6 @@ class DestinationController extends Controller
         ]);
     }
 
-
-  /**
-   * Mengambil semua data destinasi berdasarkan id tertentu.
-   */
-  public function getById(Destination $destination): JsonResponse
-  {
-
-    $destination = Destination::with(['category:id,name', 'bisnisOwner:id,name', ''])
-      ->withAvg('reviews', 'rating')
-      ->findOrFail($destination->id);
-    
-    
-
-    return $this->successResponse($destination);
-  }
 
   public function search(Request $request): JsonResponse
   {
