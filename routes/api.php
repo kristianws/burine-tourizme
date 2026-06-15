@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/logout', [AuthController::class, 'logout']);
   Route::get('/me', [UserController::class, 'me']);
   Route::patch('/me', [UserController::class, 'update']);
-  Route::patch('/me/profile-picture', [UserController::class, 'update']);
+  Route::patch('/me/profile-picture', [UserController::class, 'updatePicture']);
 });
 
 /**
@@ -57,8 +57,6 @@ Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(f
 
 Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner'])->group(function () {
 
-
-
   Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
   Route::get('destinations/', [DestinationController::class, 'index']);
   Route::post('destinations/', [DestinationController::class, 'store']);
@@ -68,8 +66,15 @@ Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner']
 });
 
 Route::prefix('admin/')->middleware(['auth:sanctum', 'role:admin'])->group(function () {
+
+  // Route untuk mengelola user
+
+
+  // route untuk mengelola bisnis owner
   Route::patch('bisnisOwners/{bisnisOwner}/approve', [BisnisOwnerController::class, 'approvedBisnisOwner']);
   Route::patch('bisnisOwners/{bisnisOwner}/reject', [BisnisOwnerController::class, 'rejectBisnisOwner']);
+
+  // Routes untuk mengelola destinasi
   Route::patch('destinations/{destination}/approve', [DestinationController::class, 'approved']);
   Route::patch('destinations/{destination}/reject', [DestinationController::class, 'rejected']);
   Route::patch('destinations/{destination}/delete', [DestinationController::class, 'deleted']);

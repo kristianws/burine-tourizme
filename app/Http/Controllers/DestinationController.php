@@ -31,6 +31,9 @@ class DestinationController extends Controller
     return $this->successResponse($destinations, 'Data Destinasi Wisata Ditemukan', 200);
   }
 
+  /**
+   * Display the specified resource.
+   */
   public function show(Destination $destination): JsonResponse
   {
     $destination->load([
