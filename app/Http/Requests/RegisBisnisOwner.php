@@ -25,7 +25,7 @@ class RegisBisnisOwner extends FormRequest
         return [
           'user_id' => 'required|exists:users,id',
           'nik' => 'required|string|unique:bisnis_owners,nik',
-          'ktp_photo' => 'required|string|accepted|mimes:jpg,jpeg,png|max:2048',
+          'ktp_photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
           'nib' => 'required|string|unique:bisnis_owners,nib'          
         ];
     }
