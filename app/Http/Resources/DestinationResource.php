@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class DestinationResource extends JsonResource
 {
@@ -14,6 +15,8 @@ class DestinationResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+      $supabaseUrl = 'https://upvdjamlioioilqhlytv.supabase.co/storage/v1/object/public/';
+      $bucketName = 'thumbnail';
       return [
         'id' => $this->id,
         'name' => $this->name,
@@ -23,7 +26,7 @@ class DestinationResource extends JsonResource
         'description' => $this->description,
         'open_time' => $this->open_time ? $this->open_time : null,
         'close_time' => $this->close_time ? $this->close_time : null,
-        'thumbnail' => $this->thumbnail ? Storage::disk('supabase_thumbnail')->url($this->thumbnail) : null,
+        'thumbnail' => $this->thumbnail ? $supabaseUrl . $bucketName . '/' . $this->thumbnail : null,
         'images' => ImageResource::collection($this->whenLoaded('imageGaleries')),
         'category' => new CategoryResource($this->whenLoaded('category')),
         'bisnis_owner' => new BisnisOwnerResource($this->whenLoaded('bisnisOwner')),

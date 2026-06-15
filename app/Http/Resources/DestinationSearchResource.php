@@ -14,14 +14,16 @@ class DestinationSearchResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-          'id' => $this->id,
-          'name' => $this->name,
-          'location' => $this->location,
-          'price' => $this->price,
-          'thumbnail' => $this->thumbnail,
-          'category' => $this->category->name,
-          'rating' => (float) ($this->reviews_avg_rating ?? 0),
-        ];
+      $supabaseUrl = 'https://upvdjamlioioilqhlytv.supabase.co/storage/v1/object/public/';
+      $bucketName = 'thumbnail';
+      return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'location' => $this->location,
+        'price' => $this->price,
+        'thumbnail' => $this->thumbnail ? $supabaseUrl . $bucketName . '/' . $this->thumbnail : null,
+        'category' => $this->category->name,
+        'rating' => (float) ($this->reviews_avg_rating ?? 0),
+      ];
     }
 }

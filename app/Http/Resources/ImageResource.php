@@ -14,10 +14,12 @@ class ImageResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+      $supabaseUrl = 'https://upvdjamlioioilqhlytv.supabase.co/storage/v1/object/public/destination_images';  
+      $bucketName = 'destination_images';
       return [
         'id' => $this->id,
         'destination_id' => $this->destination_id,
-        'image_url' => $this->path ? Storage::disk('supabase_images_galery')->url($this->path) : null,
+        'image_url' => $this->path ? $supabaseUrl . $bucketName . '/'. $this->destination_id . '/' . $this->path : null,
       ];
     }
 }
