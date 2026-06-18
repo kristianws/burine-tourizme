@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class ImageGalery extends Model
 {
     protected $fillable = [
-      'destination_id',
-      'path'
+        'destination_id',
+        'path'
     ];
 
-    public function destination() {
-      return $this->belongsTo(Destination::class);
+    public function destination()
+    {
+        return $this->belongsTo(Destination::class);
     }
 }

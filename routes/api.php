@@ -20,12 +20,13 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/destinations', [DestinationController::class, 'index']);
 Route::get('/destinations/search', [DestinationController::class, 'search']);
+Route::get('/destinations/{id}/images', [DestinationController::class, 'getImages']);
 
 /**
  * Routes API dengan token
 */
 Route::middleware('auth:sanctum')->group(function () {
-    Route::patch('/me/upload/profile-picture', [FileController::class, 'uploadProfilePicture']);
+    Route::patch('/me/upload/profile-picture', [UserController::class, 'uploadProfilePicture']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [UserController::class, 'me']);
     Route::patch('/me', [UserController::class, 'update']);
@@ -58,18 +59,20 @@ Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(f
 
 Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner'])->group(function () {
 
-    Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
+    // Route::post('')
+
+    // Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
+    Route::post('destinations/{destination}/upload-image/', [FileController::class, 'uploadDestinationImage']);
     Route::get('destinations/', [DestinationController::class, 'index']);
-    Route::patch('destinations/{id}/upload-image/', [FileController::class, 'uploadDestinationThumbnail']);
+    Route::patch('destinations/{destination}/upload-image/', [DestinationController::class, 'uploadDestinationThumbnail']);
     Route::post('destinations/', [DestinationController::class, 'store']);
-    Route::patch('destinations/{id}/update/', [DestinationController::class, 'update']);
-    Route::patch('destinations/{id}/reply-review/', [ReviewController::class, 'replyReview']);
+    Route::patch('destinations/{destination}/update/', [DestinationController::class, 'update']);
+    Route::patch('destinations/{review}/reply-review/', [ReviewController::class, 'replyReview']);
 });
 
 Route::prefix('admin/')->middleware(['auth:sanctum', 'role:admin'])->group(function () {
 
-    // Route untuk mengelola user
-
+    Route::get('dashboard/', [UserController::class, 'dashboard']);
 
     // route untuk mengelola bisnis owner
     Route::patch('bisnisOwners/{bisnisOwner}/approve', [BisnisOwnerController::class, 'approvedBisnisOwner']);

@@ -13,53 +13,53 @@ use Illuminate\Http\JsonResponse;
 
 class ReviewController extends Controller
 {
-  public function show(Destination $destination): JsonResponse
-  {
-    $reviews = Review::where('destination_id', $destination->id)->get();
+    public function show(Destination $destination): JsonResponse
+    {
+        $reviews = Review::where('destination_id', $destination->id)->get();
 
-    $reviews = ReviewResource::collection($reviews);
+        $reviews = ReviewResource::collection($reviews);
 
-    return $this->successResponse($reviews);
-  }
+        return $this->successResponse($reviews);
+    }
 
-  
 
-  public function store(ReviewRequest $request)
-  {
-    $validated = $request->validated();
 
-    $review = Review::create([
-      'user_id' => $request->user()->id,
-      'destination_id' => $validated['destination_id'],
-      'rating' => $validated['rating'],
-      'description' => $validated['description'] ?? null,
-    ]);
-    $review = new ReviewResource($review);
+    public function store(ReviewRequest $request)
+    {
+        $validated = $request->validated();
 
-    return $this->successResponse($review, 'Review berhasil ditambahkan');
-  }
+        $review = Review::create([
+            'user_id' => $request->user()->id,
+            'destination_id' => $validated['destination_id'],
+            'rating' => $validated['rating'],
+            'description' => $validated['description'] ?? null,
+        ]);
+        $review = new ReviewResource($review);
 
-  public function update(UpdateReviewRequest $request)
-  {
-    $validated = $request->validated();
+        return $this->successResponse($review, 'Review berhasil ditambahkan');
+    }
 
-    $review = Review::findOrFail($validated['review_id']);
-    $review->rating = $validated['rating'];
-    $review->description = $validated['description'] ?? $review->description;
-    $review->save();
-    $review = new ReviewResource($review);
-    
-    return $this->successResponse($review, 'Review berhasil diperbarui');
-  }
+    public function update(UpdateReviewRequest $request)
+    {
+        $validated = $request->validated();
 
-  public function replyReview(Review $review, ReplyRequest $request): JsonResponse
-  {
-    $validatedData = $request->validated();
+        $review = Review::findOrFail($validated['review_id']);
+        $review->rating = $validated['rating'];
+        $review->description = $validated['description'] ?? $review->description;
+        $review->save();
+        $review = new ReviewResource($review);
 
-    $review->owner_reply = $validatedData['owner_reply'];
-    $review->save();
-    $review = new ReviewResource($review);
+        return $this->successResponse($review, 'Review berhasil diperbarui');
+    }
 
-    return $this->successResponse($review);
-  }
+    public function replyReview(Review $review, ReplyRequest $request): JsonResponse
+    {
+        $validatedData = $request->validated();
+
+        $review->owner_reply = $validatedData['owner_reply'];
+        $review->save();
+        $review = new ReviewResource($review);
+
+        return $this->successResponse($review);
+    }
 }
