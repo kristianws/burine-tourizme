@@ -114,7 +114,7 @@ class DestinationController extends Controller
             'description' => ['required', 'string'],
             'open_time' => ['required', 'date_format:H:i:s'],
             'close_time' => ['required', 'date_format:H:i:s'],
-            'thumbnail' => ['required', 'image', 'mimes:png, jpg, webp, jpeg', 'file', 'max:5120'],
+            'thumbnail' => ['required', 'image', 'mimes:png,jpg,webp,jpeg', 'file', 'max:5120'],
         ]);
 
         $bisnisOwner = $request->user()->bisnisOwner->id;
