@@ -67,6 +67,7 @@ class BisnisOwnerController extends Controller
             $url = Storage::url($ktpPhoto);
 
             $validated['ktp_photo'] = $url;
+            $validated['user_id']   = $request->user()->id; // always use authenticated user
 
             $bisnisOwner = BisnisOwner::create($validated);
 
