@@ -63,6 +63,7 @@ Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner']
 
     // Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
     Route::post('destinations/{destination}/upload-image/', [FileController::class, 'uploadDestinationImage']);
+    Route::get('my-destinations/', [DestinationController::class, 'myDestinations']);
     Route::get('destinations/', [DestinationController::class, 'index']);
     Route::patch('destinations/{destination}/upload-image/', [DestinationController::class, 'uploadDestinationThumbnail']);
     Route::post('destinations/', [DestinationController::class, 'store']);

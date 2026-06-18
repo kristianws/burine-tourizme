@@ -42,6 +42,40 @@ class DestinationController extends Controller
     }
 
     /**
+     * Display destinations belonging to the authenticated bisnis_owner.
+     */
+    public function myDestinations(Request $request)
+    {
+        try {
+            $bisnisOwner = $request->user()->bisnisOwner;
+
+            if (!$bisnisOwner) {
+                return $this->errorResponse('Akun mitra tidak ditemukan', 404);
+            }
+
+            $destinations = Destination::with([
+                'category',
+                'imageGaleries',
+                'reviews',
+            ])->withAvg('reviews', 'rating')
+                ->where('bisnis_owner_id', $bisnisOwner->id)
+                ->latest()
+                ->paginate(12);
+
+            $result = DestinationResource::collection($destinations);
+
+            if ($result->isEmpty()) {
+                return $this->errorResponse('Belum ada destinasi', 404);
+            }
+
+            return $this->successResponse($result, 'Destinasi berhasil diambil', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
+        }
+    }
+
+
+    /**
      * Display the specified resource.
      */
     public function show(Destination $destination): JsonResponse
