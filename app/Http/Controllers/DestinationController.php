@@ -106,7 +106,7 @@ class DestinationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_name' => ['required', 'integer', 'exists:categories,id,name'],
+            'category_name' => ['required', 'integer', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
             'gmaps' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
