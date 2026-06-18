@@ -106,48 +106,51 @@ class DestinationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_name' => ['required', 'integer', 'exists:categories,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'gmaps' => ['required', 'string', 'max:255'],
-            'location' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric'],
-            'description' => ['required', 'string'],
-            'open_time' => ['required', 'date_format:H:i:s'],
-            'close_time' => ['required', 'date_format:H:i:s'],
-            'thumbnail' => ['required', 'image', 'mimes:png, jpg, webp, jpeg', 'file', 'max:5120'],
+            'category_id'  => ['required', 'integer', 'exists:categories,id'],
+            'name'         => ['required', 'string', 'max:255'],
+            'gmaps'        => ['required', 'string', 'max:255'],
+            'location'     => ['required', 'string', 'max:255'],
+            'price'        => ['required', 'numeric'],
+            'description'  => ['required', 'string'],
+            'open_time'    => ['required', 'date_format:H:i:s'],
+            'close_time'   => ['required', 'date_format:H:i:s'],
+            'thumbnail'    => ['required', 'image', 'mimes:png,jpg,webp,jpeg', 'file', 'max:5120'],
         ]);
 
-        $bisnisOwner = $request->user()->bisnisOwner->id;
+        try {
+            $bisnisOwner = $request->user()->bisnisOwner;
 
-        try {  
-            $file = $request->file('thumbnail');
-            $extensionn = $file->getClientOriginalExtension();
-            $filename = $validated['name'] . '_' . time() . '.' . $extensionn;
-            $path= $validated['name'] . '/' . $filename;
+            if (!$bisnisOwner) {
+                return $this->errorResponse('Akun mitra tidak ditemukan', 404);
+            }
 
-            $results = Storage::disk('supabase_thumbnail')->put(
+            $file      = $request->file('thumbnail');
+            $extension = $file->getClientOriginalExtension();
+            $filename  = $validated['name'] . '_' . time() . '.' . $extension;
+            $path      = $validated['name'] . '/' . $filename;
+
+            $uploaded = Storage::disk('supabase_thumbnail')->put(
                 $path,
                 file_get_contents($file),
                 'public'
             );
 
-            if (!$results) {
+            if (!$uploaded) {
                 return $this->errorResponse('Gagal mengunggah thumbnail', 500);
             }
 
-            $validated['thumbnail'] = $path;
-            $validated['category_id'] = $validated['category_name'];
-
-            $destination = Destination::create(
-                [
-                    'bisnis_owner_id' => $bisnisOwner,
-                    ...$validated,
-                ]
-            );
-
-            if (!$destination) {
-                return $this->errorResponse('Gagal membuat destinasi wisata', 500);
-            }
+            $destination = Destination::create([
+                'bisnis_owner_id' => $bisnisOwner->id,
+                'category_id'     => $validated['category_id'],
+                'name'            => $validated['name'],
+                'gmaps'           => $validated['gmaps'],
+                'location'        => $validated['location'],
+                'price'           => $validated['price'],
+                'description'     => $validated['description'],
+                'open_time'       => $validated['open_time'],
+                'close_time'      => $validated['close_time'],
+                'thumbnail'       => $path,
+            ]);
 
             return $this->successResponse(
                 data: $destination,
@@ -156,7 +159,7 @@ class DestinationController extends Controller
             );
 
         } catch (\Exception $e) {
-            return $this->errorResponse('Error Internal Server', 500);
+            return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
         }
     }
 
