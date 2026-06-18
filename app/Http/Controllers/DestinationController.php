@@ -117,7 +117,7 @@ class DestinationController extends Controller
             'thumbnail' => ['required', 'image', 'mimes:png, jpg, webp, jpeg', 'file', 'max:5120'],
         ]);
 
-        $bisnisOwner = $request->user()->bisnisOwner->bisnis_owner_id;
+        $bisnisOwner = $request->user()->bisnisOwner->id;
 
         try {  
             $file = $request->file('thumbnail');
@@ -136,6 +136,7 @@ class DestinationController extends Controller
             }
 
             $validated['thumbnail'] = $path;
+            $validated['category_id'] = $validated['category_name'];
 
             $destination = Destination::create(
                 [
