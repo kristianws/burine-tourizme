@@ -42,6 +42,22 @@ class ItineraryController extends Controller
     return $this->successResponse($itinerary, 'Detail itinerary berhasil diambil', 200);
   }
 
+  public function update(Request $request, Itinerary $itinerary)
+  {
+    if ($itinerary->user_id !== $request->user()->id) {
+      return $this->errorResponse('Anda tidak memiliki akses ke itinerary ini', 403);
+    }
+
+    $validated = $request->validate([
+      'title' => 'sometimes|required|string|max:255',
+      'start_date' => 'sometimes|required|date',
+    ]);
+
+    $itinerary->update($validated);
+
+    return $this->successResponse($itinerary, 'Itinerary berhasil diperbarui', 200);
+  }
+
   public function destroy(Request $request, Itinerary $itinerary)
   {
     if ($itinerary->user_id !== $request->user()->id) {

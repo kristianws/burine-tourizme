@@ -55,6 +55,7 @@ Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(f
     Route::get('itineraries/', [ItineraryController::class, 'index']); // menampilkan semua  itinerary milik user
     Route::post('itineraries/', [ItineraryController::class, 'store']);
     Route::get('itineraries/{itinerary}', [ItineraryController::class, 'show']);
+    Route::patch('itineraries/{itinerary}', [ItineraryController::class, 'update']);
     Route::delete('itineraries/{itinerary}', [ItineraryController::class, 'destroy']);
 
     Route::get('itineraries/{itinerary}/items', [ItineraryItemController::class, 'index']);
