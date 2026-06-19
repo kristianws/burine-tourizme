@@ -59,8 +59,6 @@ Route::prefix('tourist/')->middleware(['auth:sanctum', 'role:tourist'])->group(f
 
 Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner'])->group(function () {
 
-    // Route::post('')
-
     // Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
     Route::post('destinations/{destination}/upload-image/', [FileController::class, 'uploadDestinationImage']);
     Route::get('my-destinations/', [DestinationController::class, 'myDestinations']);

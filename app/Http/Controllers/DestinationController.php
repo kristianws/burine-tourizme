@@ -106,7 +106,7 @@ class DestinationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category_name' => ['required', 'integer', 'exists:categories,id'],
+            'category_id' => ['required', 'integer', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],
             'gmaps' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
@@ -136,7 +136,6 @@ class DestinationController extends Controller
             }
 
             $validated['thumbnail'] = $path;
-            $validated['category_id'] = $validated['category_name'];
 
             $destination = Destination::create(
                 [
@@ -156,7 +155,10 @@ class DestinationController extends Controller
             );
 
         } catch (\Exception $e) {
-            return $this->errorResponse('Error Internal Server', 500);
+            return $this->errorResponse(
+                $e->getMessage(),
+                500
+            );
         }
     }
 
