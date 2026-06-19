@@ -198,7 +198,7 @@ class DestinationController extends Controller
     
             return $this->successResponse($resource, 'Destinasi Wisata Ditemukan', 200);
         } catch (\Exception $e) {
-            return $this->errorResponse('Error Internal Server', 500);
+            return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
         }
     }
 
