@@ -330,4 +330,27 @@ class DestinationController extends Controller
 
     //     return $this->successResponse($images, 'Gambar Destinasi Wisata Ditemukan', 200);
     // }
+
+    /**
+     * Admin: list semua destinasi dengan semua status
+     */
+    public function adminListDestinations(Request $request)
+    {
+        try {
+            $query = Destination::with([
+                'category:id,name',
+                'bisnisOwner.user:id,fullname,username',
+            ])->withAvg('reviews', 'rating');
+
+            if ($request->has('status')) {
+                $query->where('status', $request->status);
+            }
+
+            $destinations = $query->latest()->get();
+
+            return $this->successResponse($destinations, 'Data destinasi berhasil diambil', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
+        }
+    }
 }

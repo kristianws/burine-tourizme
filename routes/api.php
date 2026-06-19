@@ -75,6 +75,15 @@ Route::prefix('admin/')->middleware(['auth:sanctum', 'role:admin'])->group(funct
 
     Route::get('dashboard/', [UserController::class, 'dashboard']);
 
+    // Routes untuk list data
+    Route::get('users/', [UserController::class, 'listUsers']);
+    Route::get('bisnis-owners/', [UserController::class, 'listBisnisOwners']);
+    Route::get('destinations/', [DestinationController::class, 'adminListDestinations']);
+
+    // Routes untuk ban/unban user (wisatawan & mitra)
+    Route::patch('users/{user}/suspend', [UserController::class, 'suspendUser']);
+    Route::patch('users/{user}/unsuspend', [UserController::class, 'unsuspendUser']);
+
     // route untuk mengelola bisnis owner
     Route::patch('bisnisOwners/{bisnisOwner}/approve', [BisnisOwnerController::class, 'approvedBisnisOwner']);
     Route::patch('bisnisOwners/{bisnisOwner}/reject', [BisnisOwnerController::class, 'rejectBisnisOwner']);

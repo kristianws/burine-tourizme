@@ -163,4 +163,77 @@ class UserController extends Controller
             return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
         }
     }
+
+    /**
+     * List semua user (filter by role via query param)
+     */
+    public function listUsers(Request $request)
+    {
+        try {
+            $query = User::query();
+
+            if ($request->has('role')) {
+                $query->where('role', $request->role);
+            }
+
+            $users = $query->latest()->get();
+
+            return $this->successResponse($users, 'Data user berhasil diambil', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * List semua bisnis owner dengan data user
+     */
+    public function listBisnisOwners()
+    {
+        try {
+            $bisnisOwners = BisnisOwner::with('user:id,fullname,username,email,status,suspended_at,suspended_reason')
+                ->latest()
+                ->get()
+                ->each->makeVisible(['nik', 'ktp_photo', 'nib']);
+
+            return $this->successResponse($bisnisOwners, 'Data bisnis owner berhasil diambil', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Suspend (ban) user
+     */
+    public function suspendUser(User $user, Request $request)
+    {
+        $request->validate([
+            'suspended_reason' => 'required|string',
+        ]);
+
+        if ($user->role === 'admin') {
+            return $this->errorResponse('Tidak dapat mem-ban admin', 403);
+        }
+
+        $user->update([
+            'status' => 'suspended',
+            'suspended_at' => now(),
+            'suspended_reason' => $request->suspended_reason,
+        ]);
+
+        return $this->successResponse($user, 'User berhasil di-suspend', 200);
+    }
+
+    /**
+     * Unsuspend (unban) user
+     */
+    public function unsuspendUser(User $user)
+    {
+        $user->update([
+            'status' => 'active',
+            'suspended_at' => null,
+            'suspended_reason' => null,
+        ]);
+
+        return $this->successResponse($user, 'User berhasil di-unsuspend', 200);
+    }
 }
