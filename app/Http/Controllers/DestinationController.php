@@ -83,9 +83,9 @@ class DestinationController extends Controller
         try {
             $destination->load([
                 'category:id,name',
-                'bisnisOwner:id,name',
+                'bisnisOwner.user:id,fullname,username',
                 'imageGaleries:id,destination_id,path',
-                'reviews:id,destination_id,rating',
+                'reviews.user:id,fullname,username',
             ]);
     
             $resource = new DestinationResource($destination);

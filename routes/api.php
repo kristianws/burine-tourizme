@@ -20,6 +20,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::get('/destinations', [DestinationController::class, 'index']);
 Route::get('/destinations/search', [DestinationController::class, 'search']);
+Route::get('/destinations/{destination}', [DestinationController::class, 'show']);
 Route::get('/destinations/{id}/images', [DestinationController::class, 'getImages']);
 
 /**
