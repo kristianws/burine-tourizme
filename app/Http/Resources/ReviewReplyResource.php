@@ -15,9 +15,9 @@ class ReviewReplyResource extends JsonResource
             'user_id' => $this->user_id,
             'parent_id' => $this->parent_id,
             'content' => $this->content,
-            'username' => $this->user->username,
-            'fullname' => $this->user->fullname ?? $this->user->username,
-            'profile_picture' => $this->user->profile_picture,
+            'username' => $this->user?->username ?? 'User Dihapus',
+            'fullname' => $this->user?->fullname ?? ($this->user?->username ?? 'User Dihapus'),
+            'profile_picture' => $this->user?->profile_picture,
             'created_at' => $this->created_at,
             'children' => ReviewReplyResource::collection($this->whenLoaded('children')),
         ];
