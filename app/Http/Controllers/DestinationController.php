@@ -42,6 +42,97 @@ class DestinationController extends Controller
     }
 
     /**
+     * Analytics data for the authenticated bisnis_owner.
+     */
+    public function mitraAnalytics(Request $request)
+    {
+        try {
+            $bisnisOwner = $request->user()->bisnisOwner;
+
+            if (!$bisnisOwner) {
+                return $this->errorResponse('Akun mitra tidak ditemukan', 404);
+            }
+
+            $destinations = Destination::where('bisnis_owner_id', $bisnisOwner->id)
+                ->with(['category:id,name', 'reviews', 'wishlists', 'itineraryItems'])
+                ->withAvg('reviews', 'rating')
+                ->withCount(['reviews', 'wishlists', 'itineraryItems'])
+                ->get();
+
+            // Summary stats
+            $totalDestinations = $destinations->count();
+            $approvedCount = $destinations->where('status', 'approved')->count();
+            $pendingCount = $destinations->where('status', 'pending')->count();
+            $rejectedCount = $destinations->where('status', 'rejected')->count();
+
+            $totalReviews = $destinations->sum('reviews_count');
+            $totalWishlists = $destinations->sum('wishlists_count');
+            $totalItineraryAdds = $destinations->sum('itinerary_items_count');
+
+            // Overall average rating
+            $allRatings = $destinations->pluck('reviews_avg_rating')->filter()->values();
+            $overallAvgRating = $allRatings->count() > 0 ? round($allRatings->avg(), 2) : 0;
+
+            // Rating distribution (1-5 stars across all reviews)
+            $ratingDistribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+            foreach ($destinations as $dest) {
+                foreach ($dest->reviews as $review) {
+                    $r = (int) $review->rating;
+                    if ($r >= 1 && $r <= 5) {
+                        $ratingDistribution[$r]++;
+                    }
+                }
+            }
+
+            // Per-destination breakdown
+            $supabaseUrl = config('services.supabase.url') . '/storage/v1/object/public/';
+            $bucketName = 'thumbnail';
+
+            $perDestination = $destinations->map(function ($dest) use ($supabaseUrl, $bucketName) {
+                return [
+                    'id' => $dest->id,
+                    'name' => $dest->name,
+                    'location' => $dest->location,
+                    'status' => $dest->status,
+                    'category' => $dest->category->name ?? '-',
+                    'thumbnail' => $dest->thumbnail ? $supabaseUrl . $bucketName . '/' . $dest->thumbnail : null,
+                    'price' => $dest->price,
+                    'avg_rating' => $dest->reviews_avg_rating ? round((float) $dest->reviews_avg_rating, 2) : 0,
+                    'total_reviews' => $dest->reviews_count,
+                    'total_wishlists' => $dest->wishlists_count,
+                    'total_itinerary' => $dest->itinerary_items_count,
+                ];
+            })->sortByDesc('total_reviews')->values();
+
+            // Top rated (approved only, has reviews)
+            $topRated = $perDestination
+                ->where('status', 'approved')
+                ->where('total_reviews', '>', 0)
+                ->sortByDesc('avg_rating')
+                ->take(5)
+                ->values();
+
+            return $this->successResponse([
+                'summary' => [
+                    'total_destinations' => $totalDestinations,
+                    'approved' => $approvedCount,
+                    'pending' => $pendingCount,
+                    'rejected' => $rejectedCount,
+                    'total_reviews' => $totalReviews,
+                    'total_wishlists' => $totalWishlists,
+                    'total_itinerary_adds' => $totalItineraryAdds,
+                    'overall_avg_rating' => $overallAvgRating,
+                ],
+                'rating_distribution' => $ratingDistribution,
+                'destinations' => $perDestination,
+                'top_rated' => $topRated,
+            ], 'Data analisis berhasil diambil', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Error Internal Server: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
      * Display destinations belonging to the authenticated bisnis_owner.
      */
     public function myDestinations(Request $request)
@@ -85,7 +176,17 @@ class DestinationController extends Controller
                 'category:id,name',
                 'bisnisOwner.user:id,fullname,username',
                 'imageGaleries:id,destination_id,path',
-                'reviews.user:id,fullname,username',
+                'reviews' => function ($q) {
+                    $q->with(['user', 'replies' => function ($q2) {
+                        $q2->whereNull('parent_id')
+                           ->with('user')
+                           ->with(['children' => function ($q3) {
+                               $q3->with('user')->with(['children' => function ($q4) {
+                                   $q4->with('user');
+                               }]);
+                           }]);
+                    }]);
+                },
             ]);
     
             $resource = new DestinationResource($destination);

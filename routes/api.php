@@ -22,6 +22,7 @@ Route::get('/destinations', [DestinationController::class, 'index']);
 Route::get('/destinations/search', [DestinationController::class, 'search']);
 Route::get('/destinations/{destination}', [DestinationController::class, 'show']);
 Route::get('/destinations/{id}/images', [DestinationController::class, 'getImages']);
+Route::get('/reviews/{review}/replies', [ReviewController::class, 'getReplies']);
 
 /**
  * Routes API dengan token
@@ -31,6 +32,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [UserController::class, 'me']);
     Route::patch('/me', [UserController::class, 'update']);
+
+    // Reply ke review (semua user yang login bisa balas)
+    Route::post('/reviews/replies', [ReviewController::class, 'storeReply']);
 });
 
 /**
@@ -63,6 +67,7 @@ Route::prefix('bisnis-owner/')->middleware(['auth:sanctum', 'role:bisnis_owner']
     // Route::get('dashboard/', [BisnisOwnerController::class, 'dashboard']);
     Route::post('destinations/{destination}/upload-image/', [FileController::class, 'uploadDestinationImage']);
     Route::get('my-destinations/', [DestinationController::class, 'myDestinations']);
+    Route::get('analytics/', [DestinationController::class, 'mitraAnalytics']);
     Route::get('destinations/', [DestinationController::class, 'index']);
     Route::patch('destinations/{destination}/upload-image/', [DestinationController::class, 'uploadDestinationThumbnail']);
     Route::post('destinations/', [DestinationController::class, 'store']);
