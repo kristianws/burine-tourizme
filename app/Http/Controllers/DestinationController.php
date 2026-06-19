@@ -27,7 +27,8 @@ class DestinationController extends Controller
                 'imageGaleries',
                 'reviews',
             ])->withAvg('reviews', 'rating')
-                ->paginate(6);
+                ->where('status', 'approved')
+                ->paginate(12);
     
             $destinations = DestinationResource::collection($destinations);
 
