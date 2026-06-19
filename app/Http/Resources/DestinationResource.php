@@ -19,8 +19,11 @@ class DestinationResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'gmaps' => $this->gmaps,
             'location' => $this->location,
             'price' => $this->price,
+            'category_id' => $this->category_id,
+            'status' => $this->status,
             'average_rating' => (float) $this->reviews_avg_rating ?? 0,
             'description' => $this->description,
             'open_time' => $this->open_time ? $this->open_time : null,

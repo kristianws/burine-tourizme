@@ -189,22 +189,28 @@ class DestinationController extends Controller
 
             $validated = $request->validate([
                 'category_id' =>
-                'required|exists:categories,id',
+                'sometimes|exists:categories,id',
 
                 'name' =>
-                'required|string|max:255',
+                'sometimes|string|max:255',
 
                 'description' =>
-                'required|string',
+                'sometimes|string',
 
                 'location' =>
-                'required|string|max:255',
+                'sometimes|string|max:255',
 
                 'open_time' =>
-                'required',
+                'sometimes',
 
                 'close_time' =>
-                'required'
+                'sometimes',
+
+                'price' =>
+                'sometimes|numeric',
+
+                'gmaps' =>
+                'sometimes|string|max:255',
             ]);
 
             $isSuccess = $destination->update($validated);
