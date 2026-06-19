@@ -121,7 +121,8 @@ class UserController extends Controller
                 ->with('user:id,fullname,username,email')
                 ->latest()
                 ->take(5)
-                ->get();
+                ->get()
+                ->each->makeVisible(['nik', 'ktp_photo', 'nib']);
 
             // Data pending destinasi terbaru (untuk tabel)
             $recentPendingDestinations = Destination::where('status', 'pending')
